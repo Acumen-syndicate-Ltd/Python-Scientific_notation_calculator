@@ -1,4 +1,4 @@
-# Significant digit calculator Ching Chang
+# Significant digit calculator
 """
 Rules
 +- Round to smallest decimal place
