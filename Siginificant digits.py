@@ -21,7 +21,7 @@ Rules differ for +-:
 
 
 def length(number):
-    number = list(number)
+    number = list(str(number))
     while True:
         if "." in number:
             number.remove(".")
@@ -32,7 +32,7 @@ def length(number):
 
         
 def decimal(number):
-    number = list(number)
+    number = list(str(number))
     decCount = 0
     if "." in number:
         while number[0]!= ".":
@@ -53,6 +53,9 @@ def sci_note(number):                      #Places decimal right after first num
     note_Log = {}                 
     i = 0
     if "." in number:          #For floats
+        if num[0] == ".":           #In case of weird people who don't like to put 0 in front of the decimal (looking at you Vova)
+            num.insert(0, 0)      #These two lines will add 0 in front of the decimal which will then make the number proccessable for the next command
+            number.insert(0, 0)
         while num[0] == "0":                    #Removes all frontal zeros
             num.remove(number[0])
             number.remove(number[0])
@@ -60,7 +63,7 @@ def sci_note(number):                      #Places decimal right after first num
                 num.remove(number[0])
                 number.remove(number[0])                 
                 while num[0] == "0":     #Removes frontal zeros after decimal for negative exponents
-                    if i == 1:
+                    if i == 1:     # --------------------------------------------------------------I don't understand this part, i will never equal to 1 in the part
                         exponent = 0 #Resets exponent
                         i = 1
                     num.remove(number[0])
@@ -195,8 +198,6 @@ elif sigDig == 1 and dec1 == 1:
     print("There is " + str(sigDig) + " significant digit" +" and " + str(dec1) + " decimal place here")
 else:
     print("Your values are invalid. Make sure you only enter numerical inputs!")
-
-
 
 
 
