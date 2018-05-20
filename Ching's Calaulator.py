@@ -47,5 +47,4 @@ def sci_note(num):
         number.remove[0]
     number.insert(1, ".")
     n = i - 1
-    #"".join(number)
     return str("".join(number)) + " X 10^ " + str(n)
