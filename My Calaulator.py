@@ -35,4 +35,17 @@ def decimal(num):
         return count
     else:
         return 0
-        
+
+def sci_note(num):
+    number = listify(num)
+    if "." in number:
+        i = number.index(".")
+        number.remove(".")
+    else:
+        i = len(number)
+    while number[0] == "0":
+        number.remove[0]
+    number.insert(1, ".")
+    n = i - 1
+    #"".join(number)
+    return str("".join(number)) + " X 10^ " + str(n)
