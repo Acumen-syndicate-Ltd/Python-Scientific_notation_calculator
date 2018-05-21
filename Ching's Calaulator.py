@@ -3,48 +3,73 @@ Title: Python Calculator
 Author: Ching Chang
 Date Created: May 16th, 2018
 
-This is a calculator that is smart enough to keep the correct amount of sig-digs and put the
-answer in scientific notation if neccesary
+This is a calculator that is smart enough to keep the correct amount of
+significant digits and put the answer in scientific notation if neccesary
 '''
 
-def listify(num):
-    num = str(num)
-    number = []
-    n = 0
-    for i in num:
-        number.append(num[n])
-        n += 1
-    return (number)
-
 def digits(num):
-    number = listify(num)
-    if "." in number:
-        number.remove(".")
-    while number[0] == "0":
-        number.remove("0")
-    return len(number)
+    num = list(str(num))
+    if "." in num:
+        num.remove(".")
+    while num[0] == "0":
+        del num[0]
+    return len(num)
 
 def decimal(num):
-    number = listify(num)
-    if "." in number:
+    num = list(str(num))
+    if "." in num:
         count = 0
-        n = number.index(".") + 1
-        while n < len(number):
+        n = num.index(".") + 1
+        while n < len(num):
             count += 1
             n += 1
         return count
     else:
         return 0
 
+
 def sci_note(num):
-    number = listify(num)
-    if "." in number:
-        i = number.index(".")
-        number.remove(".")
+    num = list(str(num))
+    t = 1
+    if "." in num:
+        i = num.index(".")
+        num.remove(".")
     else:
-        i = len(number)
-    while number[0] == "0":
-        number.remove[0]
-    number.insert(1, ".")
-    n = i - 1
-    return str("".join(number)) + " X 10^ " + str(n)
+        i = len(num)
+    while num[0] == "0":
+        del num[0]
+        t += 1
+    num.insert(1, ".")
+    n = i - t
+    return str("".join(num)) + " X 10^" + str(n)
+
+def round(num, digs):
+    num = list(str(num))
+    t = 1
+    if "." in num:
+        i = num.index(".")
+        num.remove(".")
+    else:
+        i = len(num)
+    while num[0] == "0":
+        del num[0]
+        t += 1
+    n = i - t
+    if digs < len(num):
+        if int(num[digs]) > 4:
+            num.insert(digs - 1, str(int(num[digs - 1]) + 1))
+            del num[digs]
+        num.reverse()
+        while len(num) > digs:
+            del num[0]
+        num.reverse()
+    else:
+        while len(num) < digs:
+            num.append("0")
+    num.insert(1, ".")
+    if n == 0:
+        return "".join(num)
+    elif n == 1:
+        return str("".join(num)) + " X 10"
+    else:
+        return str("".join(num)) + " X 10^" + str(n)
