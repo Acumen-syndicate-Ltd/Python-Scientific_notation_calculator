@@ -5,7 +5,7 @@ The current program is more of a pile of useful functions, than a functioning pr
 
 WARNING: Only use program with periods and numbers. Do not attempt to input any other character, as it will lead to unexpected results
 
-Feel free to contact voovs.13@gmail.com and supervipjim@icloud.com if you have any questions, comments, or concerns
+Feel free to contact voovs.13@gmail.com and chingtheprogrammer@icloud.com if you have any questions, comments, or concerns
 
 Sincerely, 
 
