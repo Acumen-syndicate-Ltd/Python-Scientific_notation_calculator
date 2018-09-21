@@ -7,48 +7,38 @@ Date Created: May 16th, 2018
 import re
 
 def decimal(num):
-    num = list(str(num))
+    num = str(num)
     if "." in num:
-        count = 0
-        zero_index = num.index(".") + 1
-
-        #------Move the decimal to the right------#
-        while zero_index < len(num):
-
-            #----Count how many places the decimal moved----#
-            count += 1
-            zero_index += 1
-
-        return count
+        waste, num = num.split(".")
+        return(len(num))
     else:
         return 0
 
 def digits(num):
-    num = list(num)
+    num = str(num)
     if "." in num:
-        num.remove(".")
+        num = num.replace(".", "")
     if "-" in num:
-        num.remove("-")
+        num = num.replace("-", "")
 
     #------If dumb User inputs 0-----#
     try:
         while num[0] == "0":
-            del num[0]
+            num = num[1:]
     except IndexError:
         return 1 #----Return something other than 0 to make the process continue----#
-
     return len(num)
 
 def add(num1, num2, ratio1, ratio2):
 
     #------Find the correct decimal place to round To------#
-    dec1 = min(decimal(num1), decimal(num2))
+    decimal_allowed = min(decimal(num1), decimal(num2))
 
     #------Get the sum without rounding------#
     num1 = float(num1) * ratio1
     num2 = float(num2) * ratio2
     num = num1 + num2
-    dec2 = decimal(num)
+    decimal_in_answer = decimal(num)
 
     #----If python changes num to scientific notation----#
     if "e-" in str(num):
@@ -62,25 +52,25 @@ def add(num1, num2, ratio1, ratio2):
     else:
         num = list(str(num))
 
-    dec2 = decimal("".join(num))
+    decimal_in_answer = decimal("".join(num))
 
     #------Add 0s if the answer needs more decimal places------#
-    while dec1 > dec2:
+    while decimal_allowed > decimal_in_answer:
         num.append("0")
-        dec2 += 1
+        decimal_in_answer += 1
 
     #------Round------#
-    if dec1 < dec2:
+    if decimal_allowed < decimal_in_answer:
 
         #------Check if the number after the correct decimal place is greater than 4------#
-        if int(num[dec1 + num.index(".") + 1]) > 4:
+        if int(num[decimal_allowed + num.index(".") + 1]) > 4:
             #----Move the Decimal to the Left if the Answer Shouldn't Have Any Decimal So That
             #----the Number Before the Decimal Rounds Properly----#
-            if dec1 == 0:
-                dec1 = -1
+            if decimal_allowed == 0:
+                decimal_allowed = -1
 
             #----Round the number by increasing it by 1----#
-            num[dec1 + num.index(".")] = str(int(num[dec1 + num.index(".")]) + 1)
+            num[decimal_allowed + num.index(".")] = str(int(num[decimal_allowed + num.index(".")]) + 1)
 
         #----Carry the 10 to the next digit----#
         while "10" in num:
@@ -107,14 +97,14 @@ def add(num1, num2, ratio1, ratio2):
 
         #------After rounding------#
         #----Cut off the extra digits----#
-        while dec1 < dec2:
-            if dec1 == 0:
-                dec1 -= 1
+        while decimal_allowed < decimal_in_answer:
+            if decimal_allowed == 0:
+                decimal_allowed -= 1
 
             #--Remove the last digit--#
             num.reverse()
             del num[0]
-            dec2 -= 1
+            decimal_in_answer -= 1
             num.reverse()
 
     return "".join(num)
@@ -131,12 +121,13 @@ def subtract(num1, num2, ratio1, ratio2):
     else:
         num2 = int(num2) * ratio2
 
-    return add(str(num1), str(num2), 1, 1) #----Units are already converted----#
+    #----Units are already converted----#
+    return add(str(num1), str(num2), 1, 1)
 
 def mutiply_divide(num1, num2, ratio1, ratio2, operation):
 
     #------Get the significant digit------#
-    digs = min(digits(num1), digits(num2))
+    digit_allowed = min(digits(num1), digits(num2))
 
     #------Calculation------#
     num1 = float(num1) * ratio1
@@ -144,7 +135,7 @@ def mutiply_divide(num1, num2, ratio1, ratio2, operation):
     if operation == "multiply":
         num = num1 * num2
     else:
-        num = num1/num2
+        num = num1 / num2
     if num == 0:
         return "0"
 
@@ -184,10 +175,10 @@ def mutiply_divide(num1, num2, ratio1, ratio2, operation):
     exponent -= removed_zero
 
     #------Rounding------#
-    if digs < len(num):
+    if digit_allowed < len(num):
         try:
-            if int(num[digs]) > 4:
-                num[digs - 1] = str(int(num[digs - 1]) + 1)
+            if int(num[digit_allowed]) > 4:
+                num[digit_allowed - 1] = str(int(num[digit_allowed - 1]) + 1)
 
                 #----Carry the 10s----#
                 while "10" in num:
@@ -207,15 +198,15 @@ def mutiply_divide(num1, num2, ratio1, ratio2, operation):
             return("Out of range!")
 
         #------Cut Off the Extra Digits------#
-        num = num[:digs]
+        num = num[:digit_allowed]
 
     #------Add 0s if the answer needs more digits------#
     else:
-        while len(num) < digs:
+        while len(num) < digit_allowed:
             num.append("0")
 
     #------Add the decimal, negative sign, and scientific notation------#
-    if digs != 1:
+    if digit_allowed != 1:
         num.insert(1, ".")
     if negative == True:
         num.insert(0, "-")
@@ -225,27 +216,33 @@ def mutiply_divide(num1, num2, ratio1, ratio2, operation):
         return str("".join(num)) + " X 10"
     if exponent > 1:
         if exponent <= 3:
-            return str("".join(num)) + " X 10" + eval(r'"\u00b' + str(exponent) + '"') #--Unicode for 2 and 3 is 00b--#
+            #--Unicode for 2 and 3 is 00b--#
+            return str("".join(num)) + " X 10" + eval(r'"\u00b' + str(exponent) + '"')
         elif exponent <= 9:
-            return str("".join(num)) + " X 10" + eval(r'"\u207' + str(exponent) + '"') #--Unicode for 4 to 9 is 207--#
+            #--Unicode for 4 to 9 is 207--#
+            return str("".join(num)) + " X 10" + eval(r'"\u207' + str(exponent) + '"')
         elif exponent == 10:
-            return str("".join(num)) + " X 10\u00b9\u2070" #--Return 10--#
+            #--Return 10--#
+            return str("".join(num)) + " X 10\u00b9\u2070"
         elif exponent == 11:
-            return str("".join(num)) + " X 10\u00b9\u00b9" #--Return 11--#
+            #--Return 11--#
+            return str("".join(num)) + " X 10\u00b9\u00b9"
         else:
             return "Out of range!"
     else:
         exponent *= -1
         if exponent == 1:
-            return str("".join(num)) + "X 10\u207B\u00b9"
+            return str("".join(num)) + " X 10\u207B\u00b9"
         elif exponent <= 3:
             return str("".join(num)) + " X 10\u207B" + eval(r'"\u00b' + str(exponent) + '"')
         elif exponent <= 9:
             return str("".join(num)) + " X 10\u207B" + eval(r'"\u207' + str(exponent) + '"')
         elif exponent == 10:
-            return str("".join(num)) + " X 10\u207B\u00b9\u2070" #--Return 10--#
+            #--Return 10--#
+            return str("".join(num)) + " X 10\u207B\u00b9\u2070"
         elif exponent == 11:
-            return str("".join(num)) + " X 10\u207B\u00b9\u00b9" #--Return 11--#
+            #--Return 11--#
+            return str("".join(num)) + " X 10\u207B\u00b9\u00b9"
         elif exponent <= 13:
             return str("".join(num)) + " X 10\u207B\u00b9" + eval(r'"\u00b' + str(exponent)[1] + '"')
         else:
@@ -253,8 +250,8 @@ def mutiply_divide(num1, num2, ratio1, ratio2, operation):
 
         #------For superscript unicode, see https://en.wikipedia.org/wiki/Unicode_subscripts_and_superscripts------#
 
-def give_units_and_ratios(expression):
-    match = re.search(r"(-?\d+\.?\d*)(\w*)([\+\-\*\/])(-?\d+\.?\d*)(\w*)", expression)
+def give_units_and_ratios(calculation):
+    match = re.search(r"(-?\d*\.?\d*)(\w*)([\+\-\*\/])(-?\d*\.?\d*)(\w*)", calculation)
     if match:
         unit1 = match.group(2)
         unit2 = match.group(5)
@@ -263,32 +260,35 @@ def give_units_and_ratios(expression):
         else:
             ratio1, ratio2 = (1, 1)
 
-        if "*" in expression:
+        if "*" in calculation:
             if unit1 == "" and unit2 == "": #----If there are no units----#
                 return "", ratio1, ratio2
             if unit1 != "" and unit1 == unit2: #----If the units are the same----#
                 return unit1 + "\u00b2", ratio1, ratio2
             else: #----If the units are different----#
                 return unit1 + unit2, ratio1, ratio2
-        elif "/" in expression:
+        elif "/" in calculation:
             if unit1 == unit2:
                 return "", ratio1, ratio2 #----Because the units cancel each other out----#
             else:
                 return unit1 + "/" + unit2, ratio1, ratio2
-        elif "+" in expression or "-" in expression:
+        elif "+" in calculation or "-" in calculation:
             if unit1 == unit2:
                 return unit1, ratio1, ratio2
             else:
                 pass
         return "They are in different units ¯\_(ツ)_/¯", ratio1, ratio2
-    return "", ratio1, ratio2 #----Return nothing and 1 as ratio if there are no units----#
+    #----Return nothing and 1 as ratio if there are no units----#
+    return "", 1, 1
 
 def unit_conversion(unit1, unit2):
 
     prefixes = {
-    r"(P)(\w)": 1000000000000000, r"(T)(\w)": 1000000000000, r"(G)(\w)": 1000000000, r"(M)(\w)": 1000000,
-    r"(k)(\w)": 1000, r"(h)(\w)": 100, r"(da)(\w)": 10, r"(d)(\w)": 0.1, r"(c)(\w)": 0.01, r"(m)(\w)": 0.001,
-    r"(µ)(\w)": 0.000001, r"(n)(\w)": 0.000000001, r"(p)(\w)": 0.000000000001, r"(f)(\w)": 0.000000000000001
+        r"(P)(\w)": 1000000000000000, r"(T)(\w)": 1000000000000,
+        r"(G)(\w)": 1000000000, r"(M)(\w)": 1000000, r"(k)(\w)": 1000,
+        r"(h)(\w)": 100, r"(da)(\w)": 10, r"(d)(\w)": 0.1, r"(c)(\w)": 0.01,
+        r"(m)(\w)": 0.001, r"(µ)(\w)": 0.000001, r"(n)(\w)": 0.000000001,
+        r"(p)(\w)": 0.000000000001, r"(f)(\w)": 0.000000000000001
     }
 
     exceptions = [r"cd", r"mol", r"nit"]
@@ -297,8 +297,8 @@ def unit_conversion(unit1, unit2):
 
     update1 = False #----Changes this to True when unit1 is updated----#
     update2 = False #----Changes this to True when unit2 is updated----#
-    checked1 = False
-    checked2 = False
+    checked1 = False #----Checks for the exception----#
+    checked2 = False #----Checks for the exception----#
 
     #----Get Convert to standard unit and give ratio----#
     for prefix in prefixes:
@@ -312,11 +312,13 @@ def unit_conversion(unit1, unit2):
                 exception2 = exception
                 checked2 == True
 
-        if len(unit1) > len(exception1) and update1 == False: #----So that the prefix only changes once----#
+        #----So that the prefix only changes once----#
+        if len(unit1) > len(exception1) and update1 == False:
             match = re.match(prefix, unit1)
             if match: #----If there is a prefix----#
                 prefix1 = match.group(1)
-                unit1 = re.sub(prefix, r"\2", unit1) #----Convert to Standard Unit----#
+                #----Convert to Standard Unit----#
+                unit1 = re.sub(prefix, r"\2", unit1)
                 ratio1 = prefixes[prefix]
                 update1 = True
             else: #----No prefix----#
@@ -326,11 +328,13 @@ def unit_conversion(unit1, unit2):
             prefix1 = ""
             ratio1 = 1
 
-        if len(unit2) > len(exception2) and update2 == False: #----So that the prefix only changes once----#
+        #----So that the prefix only changes once----#
+        if len(unit2) > len(exception2) and update2 == False:
             match = re.match(prefix, unit2)
             if match: #----If there is prefix----#
                 prefix2 = match.group(1)
-                unit2 = re.sub(prefix, r"\2", unit2) #----Convert to Standard Unit----#
+                #----Convert to Standard Unit----#
+                unit2 = re.sub(prefix, r"\2", unit2)
                 ratio2 = prefixes[prefix]
                 update2 = True
             else: #----No prefix----#
@@ -340,8 +344,9 @@ def unit_conversion(unit1, unit2):
             prefix2 = ""
             ratio2 = 1
 
-    if unit1 == unit2: #----Check if they are in the same units----#
-        #----Conver to the smaller unit----#
+    #----Check if they are in the same units----#
+    if unit1 == unit2:
+        #----Convert to the smaller unit----#
         if ratio1 > ratio2:
             unit1 = prefix2 + unit1
             unit2 = prefix2 + unit2
@@ -355,20 +360,36 @@ def unit_conversion(unit1, unit2):
 
     return unit1, unit2, ratio1, ratio2
 
-#---------------------UI---------------------#
+#---------------------Loop---------------------#
 print("Enter 'quit' to quit at anytime")
 while True:
-    expression = str(input("Enter the expression"))
+    calculation = str(input("Enter the calculation"))
 
     #----Remove the spaces to make the output look better----#
-    expression = re.sub(" ", "", expression)
+    calculation = re.sub(" ", "", calculation)
 
     try:
-        if expression == "quit":
+        if calculation == "quit":
             break
-        num1, num2 = re.findall(r"-?\d+\.?\d*", expression)
+
+        num1, num2 = re.findall(r"-?\d+\.?\d*", calculation)
+        #----Check for decimal at the front----#
+        match = re.search(r"\." + num1, calculation)
+        if match:
+            num1 = "0." + num1
+        match = re.search(r"\." + num2, calculation)
+        if match:
+            num2 = "0." + num2
+
+        #----Check for decimal at the end----#
+        if num1[-1] == ".":
+            num1 = num1 + "0"
+        if num2[-1] == ".":
+            num2 = num2 + "0"
+
+        #----Unit conversion----#
         try:
-            unit, ratio1, ratio2 = give_units_and_ratios(expression)
+            unit, ratio1, ratio2 = give_units_and_ratios(calculation)
         except UnboundLocalError:
             print("Invalid operation, please re-enter")
             continue
@@ -379,16 +400,16 @@ while True:
     if unit == "They are in different units ¯\_(ツ)_/¯":
         print(unit)
     else:
-        if "*" in expression:
-            print(expression + "=" + mutiply_divide(num1, num2, ratio1, ratio2, "multiply") + unit)
-        elif "/" in expression:
+        if "*" in calculation:
+            print(calculation + "=" + mutiply_divide(num1, num2, ratio1, ratio2, "multiply") + unit)
+        elif "/" in calculation:
             if float(num2) == 0.0:
-                print(expression + "=" + "undefined")
+                print(calculation + "=" + "undefined")
             else:
-                print(expression + "=" + mutiply_divide(num1, num2, ratio1, ratio2, "divide") + unit)
-        elif "+" in expression:
-            print(expression + "=" + add(num1, num2, ratio1, ratio2) + unit)
-        elif "-" in expression:
-            print(expression + "=" + subtract(num1, num2, ratio1, ratio2) + unit)
+                print(calculation + "=" + mutiply_divide(num1, num2, ratio1, ratio2, "divide") + unit)
+        elif "+" in calculation:
+            print(calculation + "=" + add(num1, num2, ratio1, ratio2) + unit)
+        elif "-" in calculation:
+            print(calculation + "=" + subtract(num1, num2, ratio1, ratio2) + unit)
         else:
             print("Invalid operation, please re-enter")
